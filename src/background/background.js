@@ -1,10 +1,10 @@
 const browserTabs = chrome ? chrome.tabs : browser.tabs;
 
 function fetchTranslation(response) {
-  sessionStorage.setItem('tabId', response.tabId);
-  sessionStorage.setItem('text', response.text);
-  sessionStorage.setItem('targetLang', response.targetLang);
-  sessionStorage.setItem('sourceLang', response.sourceLang);
+  localStorage.setItem('tabId', response.tabId);
+  localStorage.setItem('text', response.text);
+  localStorage.setItem('targetLang', response.targetLang);
+  localStorage.setItem('sourceLang', response.sourceLang);
 
   window.open('https://www.deepl.com/translate', '_blank');
 }
