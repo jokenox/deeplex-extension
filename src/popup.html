@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Deeplex</title>
+    <link rel="stylesheet" href="popup.css">
+    <link href="https://fonts.googleapis.com/css?family=Heebo|Roboto" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="header">
+      <img class="header__icon" src="../img/icon48.png">
+      <p class="header__title">Deeplex</p>
+    </div>
+
+    <div class="content">
+      <p class="content__label">Translate page:</p>
+
+      <form id="translationForm" method="post">
+        <select class="lang-select" name="sourceLangs">
+          <option value="auto">Detect</option>
+          <option value="ES">Spanish</option>
+          <option value="EN">English</option>
+          <option value="DE">Deutsch</option>
+          <option value="FR">French</option>
+          <option value="PR">Portuguese</option>
+          <option value="IT">Italian</option>
+          <option value="NL">Dutch</option>
+          <option value="PL">Polish</option>
+          <option value="RU">Russian</option>
+        </select>
+
+        <span class="content__arrow"> > </span>
+
+        <select class="lang-select" name="targetLangs">
+          <option value="ES">Spanish</option>
+          <option value="EN">English</option>
+          <option value="DE">Deutsch</option>
+          <option value="FR">French</option>
+          <option value="PR">Portuguese</option>
+          <option value="IT">Italian</option>
+          <option value="NL">Dutch</option>
+          <option value="PL">Polish</option>
+          <option value="RU">Russian</option>
+        </select>
+
+        <input class="translate-button" type="submit" value="Translate">
+      </form>
+    </div>
+
+    <div class="footer">
+      <p>GitHub</p>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

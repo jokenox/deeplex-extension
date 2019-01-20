@@ -1,0 +1,39 @@
+{
+  "manifest_version": 2,
+  "name": "Deeplex",
+  "version": "0.1.0",
+  "description": "Website Translator",
+  "author": "Kenny Cruz",
+  "icons": {
+    "16": "img/icon16.png",
+    "48": "img/icon48.png",
+    "128": "img/icon128.png"
+  },
+  "browser_action": {
+    "default_title": "Deeplex",
+    "default_icon": "img/icon.png",
+    "default_popup": "src/popup.html"
+  },
+  "background": {
+    "scripts": [
+      "src/background/background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.deepl.com/translate"],
+      "js": ["src/content-scripts/deepl-bot.js"]
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/content-scripts/translate-page.js",
+        "src/content-scripts/parser.js"
+      ]
+    }
+  ],
+  "permisions": [
+    "activeTab",
+    "storage"
+  ]
+}
