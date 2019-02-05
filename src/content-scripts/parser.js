@@ -40,12 +40,19 @@ function getParagraphs(element) {
   return paragraphs;
 }
 
+function getParagraphsText(element) {
+  let paragraphs = getParagraphs(element);
+  paragraphs = paragraphs.map(paragraph => paragraph.outerHTML);
+
+  return paragraphs;
+}
+
 // Message Listener
 const runtime = chrome ? chrome.runtime : browser.runtime;
 runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.targetLang) sendResponse({
     'tabId': sender,
-    'text': getParagraphs(document),
+    'text': getParagraphsText(document),
     'targetLang': message.targetLang,
     'sourceLang': message.sourceLang
   });

@@ -124,3 +124,25 @@ async function newTranslation(text, targetLang, sourceLang) {
     }
   }
 }
+
+async function translateTextList(list, targetLang, sourceLang) {
+  for (let i = 0; i < list.length; i++) {
+    list[i] = await newTranslation(list[i], targetLang, sourceLang);
+  }
+  await Promise.all(list);
+
+  window.console.log(list);
+  return list;
+}
+
+function checkForNewTranslations(callback) {
+  const runtime = chrome ? chrome.runtime : browser.runtime;
+  
+  runtime.sendMessage(
+    chrome.runtime.id,
+    { 'translator': true },
+    callback
+  );
+}
+
+checkForNewTranslations(translateTextList);
