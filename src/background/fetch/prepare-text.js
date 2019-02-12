@@ -10,42 +10,72 @@ function textToList(text) {
   return text.split('\n-\n');
 }
 
-function maskElementTags(element) {
+function maskTagsInElement(element) {
   return element.innerHTML.replace(/</g, '(<').replace(/>/g, '>)');
 }
 
-function unmaskElementTags(element) {
+function unmaskTagsInElement(element) {
   return element.innerHTML.replace(/\(</g, '<').replace(/>\)/g, '>');
 }
 
-function maskElementsTags(list) {
+function maskTagsInElements(list) {
   return list.map(element => maskElementTags(element));
 }
 
-function unmaskElementsTags(list) {
+function unmaskTagsInElements(list) {
   return list.map(element => unmaskElementTags(element));
 }
 
-function pepareElementsList(list) {
+function maskTagsInString(string) {
+  return string.replace(/</g, '(<').replace(/>/g, '>)');
+}
+
+function unmaskTagsInString(string) {
+  return string.replace(/\(</g, '<').replace(/>\)/g, '>');
+}
+
+function prepareElement(element) {
+  let text = element.nodeName !== '#text' ? `(<${element.nodeName}>)` : '';
+
+  if (element.hasChildNodes()) {
+    element.childNodes.forEach(node => {
+      text += prepareElement(node);
+    });
+  } else {
+    let nodeName = element.nodeName;
+
+    if (element.nodeName === '#text') {
+      text += element.textContent;
+    } else {
+      text += `(<${nodeName}>)${element.textContent}(</${nodeName}>)`;
+    }
+  }
+
+  text += element.nodeName !== '#text' ? `(</${element.nodeName}>)` : '';
+
+  return text;
+}
+
+function doseTranslation(list) {
   let partitions = [];
   let charNumber = 0;
   let lastIndex = 0;
   list.forEach((element, index) => {
-    let tagsMaskedElement = maskElementTags(element);
-    if (charNumber + tagsMaskedElement.length <= 5000) {
-      charNumber += tagsMaskedElement.length + 3;
+    let preparedElement = prepareElement(element);
+    list[index] = preparedElement;
+    
+    if (charNumber + preparedElement.length <= 5000) {
+      charNumber += preparedElement.length + 3;
     } else {
-      let partition = list.slice(lastIndex, index);
-      let partitionInText = listToText(maskElementsTags(partition));
-      partitions.push([partition, partitionInText]);
-      charNumber = tagsMaskedElement.length;
+      let partition = listToText(list.slice(lastIndex, index))
+      partitions.push(partition);
+      charNumber = preparedElement.length;
       lastIndex = index;
     }
 
     if (index === list.length - 1) {
-      let partition = list.slice(lastIndex, index + 1);
-      let partitionInText = listToText(maskElementsTags(partition));
-      partitions.push([partition, partitionInText]);
+      let partition = listToText(list.slice(lastIndex, index + 1));
+      partitions.push(partition);
     }
   });
 
