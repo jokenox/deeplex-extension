@@ -15,7 +15,7 @@ function maskTagsInElement(element) {
 }
 
 function unmaskTagsInElement(element) {
-  return element.innerHTML.replace(/\(</g, '<').replace(/>\)/g, '>');
+  return element.innerHTML.replace(/\(<+/g, '<').replace(/>+\)/g, '>');
 }
 
 function maskTagsInElements(list) {
@@ -31,29 +31,53 @@ function maskTagsInString(string) {
 }
 
 function unmaskTagsInString(string) {
-  return string.replace(/\(</g, '<').replace(/>\)/g, '>');
+  return string.replace(/\(<+/g, '<').replace(/>+\)/g, '>');
+}
+
+function enumerateElementNodes(element, number) {
+  number ? 1 : number = 0;
+
+  element.setAttribute('dx', number);
+  
+  if (element.hasChildNodes()) {
+    [].slice.call(element.children).forEach(e => {
+      enumerateElementNodes(e, ++number);
+    });
+  }
+}
+
+function disenumerateElementNodes(element) {
+  element.removeAttribute('dx');
+
+  if (element.hasChildNodes()) {
+    [].slice.call(element.children).forEach(e => {
+      disenumerateElementNodes(e);
+    });
+  }
 }
 
 function prepareElement(element) {
-  let text = element.nodeName !== '#text' ? `(<${element.nodeName}>)` : '';
+  let text = '';
+
+  if (element.nodeName !== '#text') {
+    text += `(<${element.nodeName} dx="${element.attributes.dx.value}">)`;
+  }
 
   if (element.hasChildNodes()) {
     element.childNodes.forEach(node => {
       text += prepareElement(node);
     });
   } else {
-    let nodeName = element.nodeName;
-
-    if (element.nodeName === '#text') {
-      text += element.textContent;
-    } else {
-      text += `(<${nodeName}>)${element.textContent}(</${nodeName}>)`;
-    }
+    text += element.textContent;
   }
 
   text += element.nodeName !== '#text' ? `(</${element.nodeName}>)` : '';
 
   return text;
+}
+
+function revertPreparation(string) {
+  textToList(string);
 }
 
 function doseTranslation(list) {
