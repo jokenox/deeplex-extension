@@ -2,6 +2,8 @@ const browserTabs = chrome.tabs || browser.tabs;
 const runtime = chrome.runtime || browser.runtime;
 
 function fetchTranslation(response) {
+  //let texts = doseTranslation(response.text);
+
   localStorage.setItem('tabId', response.tabId);
   localStorage.setItem('text', response.text.join('[&,]'));
   localStorage.setItem('targetLang', response.targetLang);
@@ -23,8 +25,11 @@ function translatePage(targetLang, sourceLang) {
 
 runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.translator) {
+    let text = localStorage.getItem('text').split('[&,]');
+    //text = doseTranslation(text);
+
     sendResponse(
-      localStorage.getItem('text').split('[&,]'),
+      text,
       localStorage.getItem('targetLang'),
       localStorage.getItem('sourceLang')
     );

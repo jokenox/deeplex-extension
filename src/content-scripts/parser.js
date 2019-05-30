@@ -48,7 +48,7 @@ function getParagraphsText(element) {
 }
 
 // Message Listener
-const runtime = chrome ? chrome.runtime : browser.runtime;
+const runtime = chrome.runtime || browser.runtime;
 runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.targetLang) sendResponse({
     'tabId': sender,

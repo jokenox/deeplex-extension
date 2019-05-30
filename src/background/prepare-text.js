@@ -2,6 +2,8 @@
 // Licensed under the MIT License
 // Copyright (c) 2019 Kenny Cruz
 
+var elementsAttributesList = [];
+
 function listToText(list) {
   return list.join('\n-\n');
 }
@@ -34,33 +36,31 @@ function unmaskTagsInString(string) {
   return string.replace(/\(<+/g, '<').replace(/>+\)/g, '>');
 }
 
-function enumerateElementNodes(element, number) {
-  number ? 1 : number = 0;
+function maskElementAttributes(element) {
+  if (element.hasAttributes()) {
+    elementsAttributesList.push(element.attributes);
+    element.setAttribute('dx', elementsAttributesList.length - 1);
+  }
 
-  element.setAttribute('dx', number);
-  
   if (element.hasChildNodes()) {
     [].slice.call(element.children).forEach(e => {
-      enumerateElementNodes(e, ++number);
+      maskElementAttributes(e);
     });
   }
 }
 
-function disenumerateElementNodes(element) {
-  element.removeAttribute('dx');
+function prepareElement(element, innerOnly) {
+  let nodeName = element.nodeName.toLowerCase();
+  let text = ''; 
 
-  if (element.hasChildNodes()) {
-    [].slice.call(element.children).forEach(e => {
-      disenumerateElementNodes(e);
-    });
-  }
-}
+  if (nodeName !== '#text' && !innerOnly) {
+    text += `(<${nodeName}`;
 
-function prepareElement(element) {
-  let text = '';
+    if (element.attributes.dx) {
+      text += ` dx="${element.attributes.dx.value}"`;
+    }
 
-  if (element.nodeName !== '#text') {
-    text += `(<${element.nodeName} dx="${element.attributes.dx.value}">)`;
+    text += '>)';
   }
 
   if (element.hasChildNodes()) {
@@ -71,7 +71,9 @@ function prepareElement(element) {
     text += element.textContent;
   }
 
-  text += element.nodeName !== '#text' ? `(</${element.nodeName}>)` : '';
+  if (nodeName !== '#text' && !innerOnly) {
+    text += `(</${nodeName}>)`;
+  }
 
   return text;
 }
@@ -85,13 +87,14 @@ function doseTranslation(list) {
   let charNumber = 0;
   let lastIndex = 0;
   list.forEach((element, index) => {
-    let preparedElement = prepareElement(element);
+    maskElementAttributes(element);
+    let preparedElement = prepareElement(element, true);
     list[index] = preparedElement;
     
     if (charNumber + preparedElement.length <= 5000) {
       charNumber += preparedElement.length + 3;
     } else {
-      let partition = listToText(list.slice(lastIndex, index))
+      let partition = listToText(list.slice(lastIndex, index));
       partitions.push(partition);
       charNumber = preparedElement.length;
       lastIndex = index;
@@ -105,3 +108,17 @@ function doseTranslation(list) {
 
   return partitions;
 }
+
+const runtime = chrome.runtime || browser.runtime;
+runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.translator) {
+    let text = localStorage.getItem('text').split('[&,]');
+    text = doseTranslation(text);
+
+    sendResponse(
+      text,
+      localStorage.getItem('targetLang'),
+      localStorage.getItem('sourceLang')
+    );
+  }
+});
