@@ -1,15 +1,15 @@
-// Serverless DeepL API
+// DeepL Bot
 // Licensed under the MIT License
 // Copyright (c) 2019 Kenny Cruz
 
 const selectors = {
+  deeplTranslator: '#dl_translator',
   sourceTextarea: '.lmt__source_textarea',
   targetTextarea: '.lmt__target_textarea',
-  sourceLangSelect: '.lmt__language_select--source > div',
-  targetLangSelect: '.lmt__language_select--target > div',
+  sourceLangSelect: '.lmt__language_select--source',
+  targetLangSelect: '.lmt__language_select--target',
   clearTextButton: '.lmt__clear_text_button',
-  busyIndicator: '.lmt__busy_indicator',
-  busyIndicatorActive: 'lmt__busy_indicator--active',
+  busyIndicatorActive: 'lmt--active_translation_request',
   autoLang: 'button[dl-value=auto]',
   esLang: 'button[dl-value=ES]',
   enLang: 'button[dl-value=EN]',
@@ -22,12 +22,12 @@ const selectors = {
   ruLang: 'button[dl-value=RU]'
 };
 
+const deeplTranslator = document.querySelector(selectors.deeplTranslator);
 const sourceTextarea = document.querySelector(selectors.sourceTextarea);
 const targetTextarea = document.querySelector(selectors.targetTextarea);
 const sourceLangSelect = document.querySelector(selectors.sourceLangSelect);
 const targetLangSelect = document.querySelector(selectors.targetLangSelect);
 const clearTextButton = document.querySelector(selectors.clearTextButton);
-const busyIndicator = document.querySelector(selectors.busyIndicator);
 
 function timePromise(milliseconds) {
   return new Promise(res => setTimeout(res, milliseconds));
@@ -91,7 +91,7 @@ function translationInTarget() {
   return (
     targetTextarea.value.trim()
     && targetTextarea.value.trim().substring(0, 5) !== '[...]'
-    && !busyIndicator.classList.contains(selectors.busyIndicatorActive)
+    && !deeplTranslator.classList.contains(selectors.busyIndicatorActive)
   );
 }
 
@@ -126,23 +126,33 @@ async function newTranslation(text, targetLang, sourceLang) {
 }
 
 async function translateTextList(list, targetLang, sourceLang) {
-  for (let i = 0; i < list.length; i++) {
-    list[i] = await newTranslation(list[i], targetLang, sourceLang);
-  }
-  await Promise.all(list);
+  let translationsList = [];
 
-  window.console.log(list);
-  return list;
+  for (let i = 0; i < list.length; i++) {
+    translationsList[i] = await newTranslation(list[i], targetLang, sourceLang);
+  }
+  
+  await Promise.all(translationsList);
+
+  return translationsList;
+}
+
+async function translateMessageResponse(response) {
+  let textList = response.textList;
+  let targetLang = response.targetLang;
+  let sourceLang = response.sourceLang;
+
+  return await translateTextList(textList, targetLang, sourceLang);
 }
 
 function checkForNewTranslations(callback) {
-  const runtime = chrome ? chrome.runtime : browser.runtime;
+  const runtime = chrome.runtime || browser.runtime;
   
   runtime.sendMessage(
-    chrome.runtime.id,
+    runtime.id,
     { 'translator': true },
     callback
   );
 }
 
-checkForNewTranslations(translateTextList);
+checkForNewTranslations(translateMessageResponse);

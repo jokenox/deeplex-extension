@@ -25,13 +25,13 @@ function translatePage(targetLang, sourceLang) {
 
 runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.translator) {
-    let text = localStorage.getItem('text').split('[&,]');
+    let response = {
+      'textList': localStorage.getItem('text').split('[&,]'),
+      'targetLang': localStorage.getItem('targetLang'),
+      'sourceLang': localStorage.getItem('sourceLang'),
+    }
     //text = doseTranslation(text);
 
-    sendResponse(
-      text,
-      localStorage.getItem('targetLang'),
-      localStorage.getItem('sourceLang')
-    );
+    sendResponse(response);
   }
 });
