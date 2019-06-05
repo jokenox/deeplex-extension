@@ -4,8 +4,10 @@ const runtime = chrome.runtime || browser.runtime;
 function fetchTranslation(response) {
   //let texts = doseTranslation(response.text);
 
+  let texts = response.text.map(text => htmlToTML(text));
+
   localStorage.setItem('tabId', response.tabId);
-  localStorage.setItem('text', response.text.join('[&,]'));
+  localStorage.setItem('text', texts.join('[&,]'));
   localStorage.setItem('targetLang', response.targetLang);
   localStorage.setItem('sourceLang', response.sourceLang);
   

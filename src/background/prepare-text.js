@@ -109,16 +109,33 @@ function doseTranslation(list) {
   return partitions;
 }
 
-const runtime = chrome.runtime || browser.runtime;
-runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.translator) {
-    let text = localStorage.getItem('text').split('[&,]');
-    text = doseTranslation(text);
 
-    sendResponse(
-      text,
-      localStorage.getItem('targetLang'),
-      localStorage.getItem('sourceLang')
-    );
+// |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+let TML_Attributes = [];
+
+function convertToTML(element) {
+  let number = TML_Attributes.length;
+
+  TML_Attributes.push(element.attributes);
+
+  let newElement = document.createElement(`t${number}`);
+  newElement.innerHTML = element.innerHTML;
+
+  if (newElement.hasChildNodes()) {
+    newElement.childNodes.forEach(child => {
+      if (child.nodeName !== '#text') {
+        child.outerHTML = convertToTML(child).outerHTML;
+      }
+    });
   }
-});
+
+  return newElement;
+}
+
+function htmlToTML(html) {
+  let element = document.createElement('div');
+  element.innerHTML = html;
+
+  return convertToTML(element.firstChild).outerHTML;
+}
