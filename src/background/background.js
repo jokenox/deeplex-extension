@@ -1,15 +1,13 @@
 const browserTabs = chrome.tabs || browser.tabs;
 const runtime = chrome.runtime || browser.runtime;
 
+let translationData;
+
 function fetchTranslation(response) {
   //let texts = doseTranslation(response.text);
 
-  let texts = response.text.map(text => htmlToTML(text));
-
-  localStorage.setItem('tabId', response.tabId);
-  localStorage.setItem('text', texts.join('[&,]'));
-  localStorage.setItem('targetLang', response.targetLang);
-  localStorage.setItem('sourceLang', response.sourceLang);
+  translationData = response;
+  translationData.text = response.text.map(text => htmlToTML(text));
   
   window.open('https://www.deepl.com/translate', '_blank');
 }
@@ -28,9 +26,9 @@ function translatePage(targetLang, sourceLang) {
 runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.translator) {
     let response = {
-      'textList': localStorage.getItem('text').split('[&,]'),
-      'targetLang': localStorage.getItem('targetLang'),
-      'sourceLang': localStorage.getItem('sourceLang'),
+      'textList': translationData.text,
+      'targetLang': translationData.targetLang,
+      'sourceLang': translationData.sourceLang,
     }
     //text = doseTranslation(text);
 
