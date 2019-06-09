@@ -4,6 +4,9 @@
 
 const elementsBlacklist = ['SCRIPT', 'STYLE', 'CODE', 'I'];
 
+let originalPageElements = [];
+let currentPageElements = [];
+
 function hasTextChildren(container) {
   let containsText = false;
 
@@ -47,18 +50,16 @@ function getParagraphs(element) {
 }
 
 function getParagraphsText(element) {
-  let paragraphs = getParagraphs(element);
-  paragraphs = paragraphs.map(paragraph => paragraph.outerHTML);
-  return paragraphs;
+  currentPageElements = getParagraphs(element);
+  originalPageElements = currentPageElements.map(paragraph => paragraph.outerHTML);
+  return originalPageElements;
 }
 
 // Message Listener
-const runtime = chrome.runtime || browser.runtime;
-runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.targetLang) sendResponse({
-    'tabId': sender,
+(chrome.runtime || browser.runtime).onMessage.addListener((message, sender, sendResponse) => {
+  if (message.subject == 'parse-page') sendResponse({
     'text': getParagraphsText(document),
-    'targetLang': message.targetLang,
-    'sourceLang': message.sourceLang
+    'targetLang': message.data.targetLang,
+    'sourceLang': message.data.sourceLang
   });
 });

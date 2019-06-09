@@ -2,7 +2,7 @@
 // Licensed under the MIT License
 // Copyright (c) 2019 Kenny Cruz
 
-var elementsAttributesList = [];
+let tmlAttributes = [];
 
 function listToText(list) {
   return list.join('\n-\n');
@@ -12,91 +12,42 @@ function textToList(text) {
   return text.split('\n-\n');
 }
 
-function maskTagsInElement(element) {
-  return element.innerHTML.replace(/</g, '(<').replace(/>/g, '>)');
+function maskTags(string) {
+  return string.replace(/<(?=[a-z]|[A-Z])/g, '(<')
+               .replace(/<\/(?=[a-z]|[A-Z])/g, '(</')
+               .replace(/>/g, '>)');
 }
 
-function unmaskTagsInElement(element) {
-  return element.innerHTML.replace(/\(<+/g, '<').replace(/>+\)/g, '>');
-}
-
-function maskTagsInElements(list) {
-  return list.map(element => maskElementTags(element));
-}
-
-function unmaskTagsInElements(list) {
-  return list.map(element => unmaskElementTags(element));
-}
-
-function maskTagsInString(string) {
-  return string.replace(/</g, '(<').replace(/>/g, '>)');
-}
-
-function unmaskTagsInString(string) {
+function unmaskTags(string) {
   return string.replace(/\(<+/g, '<').replace(/>+\)/g, '>');
 }
 
-function maskElementAttributes(element) {
-  if (element.hasAttributes()) {
-    elementsAttributesList.push(element.attributes);
-    element.setAttribute('dx', elementsAttributesList.length - 1);
-  }
+function maskTML(tml) {
+  let masked = maskTags(tml);
+  masked = masked.replace(/\(<t/g, '(<').replace(/\(<\/t/g, '(</');
 
-  if (element.hasChildNodes()) {
-    [].slice.call(element.children).forEach(e => {
-      maskElementAttributes(e);
-    });
-  }
+  return masked;
 }
 
-function prepareElement(element, innerOnly) {
-  let nodeName = element.nodeName.toLowerCase();
-  let text = ''; 
+function unmaskTML(maskedTML) {
+  let unmasked = maskedTML.replace(/\(<+(?!\/)/g, '(<t').replace(/\(<+\//g, '(</t');
+  unmasked = unmaskTags(unmasked);
 
-  if (nodeName !== '#text' && !innerOnly) {
-    text += `(<${nodeName}`;
-
-    if (element.attributes.dx) {
-      text += ` dx="${element.attributes.dx.value}"`;
-    }
-
-    text += '>)';
-  }
-
-  if (element.hasChildNodes()) {
-    element.childNodes.forEach(node => {
-      text += prepareElement(node);
-    });
-  } else {
-    text += element.textContent;
-  }
-
-  if (nodeName !== '#text' && !innerOnly) {
-    text += `(</${nodeName}>)`;
-  }
-
-  return text;
-}
-
-function revertPreparation(string) {
-  textToList(string);
+  return unmasked;
 }
 
 function doseTranslation(list) {
   let partitions = [];
   let charNumber = 0;
   let lastIndex = 0;
+
   list.forEach((element, index) => {
-    maskElementAttributes(element);
-    let preparedElement = prepareElement(element, true);
-    list[index] = preparedElement;
-    
-    if (charNumber + preparedElement.length <= 5000) {
-      charNumber += preparedElement.length + 3;
+    if (charNumber + element.length <= 5000) {
+      charNumber += element.length + 3;
     } else {
       let partition = listToText(list.slice(lastIndex, index));
       partitions.push(partition);
-      charNumber = preparedElement.length;
+      charNumber = element.length;
       lastIndex = index;
     }
 
@@ -109,15 +60,22 @@ function doseTranslation(list) {
   return partitions;
 }
 
+function undoseTranslation(list) {
+  let translations = list.map(element => textToList(element));
+  translations = translations.reduce((left, right) => left.concat(right));
 
-// |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-
-let TML_Attributes = [];
+  return translations;
+}
 
 function convertToTML(element) {
-  let number = TML_Attributes.length;
+  let number = tmlAttributes.length;
 
-  TML_Attributes.push(element.attributes);
+  let elementAttributes = {
+    'tagName': element.tagName,
+    'attributes': element.attributes
+  }
+
+  tmlAttributes.push(elementAttributes);
 
   let newElement = document.createElement(`t${number}`);
   newElement.innerHTML = element.innerHTML;
@@ -138,4 +96,34 @@ function htmlToTML(html) {
   element.innerHTML = html;
 
   return convertToTML(element.firstChild).outerHTML;
+}
+
+function tmlToHTML(tml) {
+  let element = document.createElement('div');
+  element.innerHTML = tml;
+
+  let tmlElement = element.firstChild;
+  let tmlTagNumber = Number(tmlElement.tagName.substring(1));
+  let elementAttributes = [... tmlAttributes[tmlTagNumber].attributes];
+
+  element = document.createElement(tmlAttributes[tmlTagNumber].tagName);
+  element.innerHTML = tmlElement.innerHTML;
+
+  elementAttributes.forEach(attribute => {
+    element.setAttribute(attribute.name, attribute.value);
+  });
+
+  if (element.hasChildNodes()) {
+    element.childNodes.forEach(child => {
+      if (child.nodeName !== '#text') {
+        child.outerHTML = tmlToHTML(child.outerHTML);
+      }
+    });
+  }
+
+  return element.outerHTML;
+}
+
+function emptyTmlAttributesList() {
+  tmlAttributes = [];
 }

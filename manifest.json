@@ -28,7 +28,7 @@
     {
       "matches": ["<all_urls>"],
       "js": [
-        "src/content-scripts/translate-page.js",
+        "src/content-scripts/apply-translation.js",
         "src/content-scripts/parser.js"
       ]
     }
@@ -36,7 +36,8 @@
   "externally_connectable": {
     "matches": ["<all_urls>"]
   },
-  "permisions": [
+  "permissions": [
+    "tabs",
     "activeTab",
     "storage"
   ]

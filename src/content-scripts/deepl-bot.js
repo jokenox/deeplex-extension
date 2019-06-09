@@ -128,8 +128,8 @@ async function newTranslation(text, targetLang, sourceLang) {
 async function translateTextList(list, targetLang, sourceLang) {
   let translationsList = [];
 
-  for (let i = 0; i < list.length; i++) {
-    translationsList[i] = await newTranslation(list[i], targetLang, sourceLang);
+  for (let text of list) {
+    translationsList.push(await newTranslation(text, targetLang, sourceLang));
   }
   
   await Promise.all(translationsList);
@@ -137,20 +137,30 @@ async function translateTextList(list, targetLang, sourceLang) {
   return translationsList;
 }
 
+// Messaging
+const runtime = chrome.runtime || browser.runtime;
+
 async function translateMessageResponse(response) {
   let textList = response.textList;
   let targetLang = response.targetLang;
   let sourceLang = response.sourceLang;
 
-  return await translateTextList(textList, targetLang, sourceLang);
+  let translations = await translateTextList(textList, targetLang, sourceLang);
+
+  let message = {
+    'subject': 'translations-list',
+    'data': {
+      'translations': translations
+    }
+  };
+
+  runtime.sendMessage(runtime.id, message, () => window.close());
 }
 
 function checkForNewTranslations(callback) {
-  const runtime = chrome.runtime || browser.runtime;
-  
   runtime.sendMessage(
     runtime.id,
-    { 'translator': true },
+    { 'subject': 'check-for-translations' },
     callback
   );
 }
