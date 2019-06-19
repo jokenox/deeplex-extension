@@ -3,7 +3,6 @@
 // Copyright (c) 2019 Kenny Cruz
 
 let translatedPageElements = [];
-let nextIndex = 0;
 
 function applyPageTranslation() {
   currentPageElements.forEach((element, index) => {
@@ -11,11 +10,9 @@ function applyPageTranslation() {
   });
 }
 
-function revertPageTranslation(originalElements) {
-  let elements = getParagraphs(document);
-  translatedPageElements = elements;
-  elements.forEach((element, index) => {
-    element.innerHTML = originalPageElements[index].innerHTML;
+function revertPageTranslation() {
+  currentPageElements.forEach((element, index) => {
+    element.outerHTML = originalPageElements[index];
   });
 }
 

@@ -29,6 +29,7 @@ function translatePage(targetLang, sourceLang) {
   });
 }
 
+// Message Listener
 runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.subject == 'check-for-translations') {
     let response = {

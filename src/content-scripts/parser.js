@@ -1,22 +1,23 @@
 // Deeplex Parser
 // Licensed under the MIT License
 // Copyright (c) 2019 Kenny Cruz
+// github.com/jokenox
 
 const elementsBlacklist = ['SCRIPT', 'STYLE', 'CODE', 'I'];
 
 let originalPageElements = [];
 let currentPageElements = [];
 
-function hasTextChildren(container) {
-  let containsText = false;
+function hasTextChildren(element) {
+  let containsTextChild = false;
 
-  container.childNodes.forEach(element => {
-    if (element.nodeName === '#text' && element.textContent.trim()) {
-      containsText = true;
+  element.childNodes.forEach(child => {
+    if (child.nodeName === '#text' && child.textContent.trim()) {
+      containsTextChild = true;
     }
   });
 
-  return containsText;
+  return containsTextChild;
 }
 
 function isTranslatable(element) {
@@ -32,34 +33,32 @@ function isTranslatable(element) {
   return !(inBlacklist || !translatable);
 }
 
-function getParagraphs(element) {
-  let paragraphs = [];
+function getElementsWithText(element) {
+  let elementsWithText = [];
 
   if (isTranslatable(element)) {
     if (hasTextChildren(element)) {
-      paragraphs = paragraphs.concat(element);
+      elementsWithText.push(element);
     } else {
-      element.childNodes.forEach(element => {
-        let paragraphs2 = getParagraphs(element);
-        if (paragraphs2.length) paragraphs = paragraphs.concat(paragraphs2);
+      element.childNodes.forEach(childElement => {
+        elementsWithText = elementsWithText.concat(getElementsWithText(childElement));
       });
     }
   }
 
-  return paragraphs;
-}
-
-function getParagraphsText(element) {
-  currentPageElements = getParagraphs(element);
-  originalPageElements = currentPageElements.map(paragraph => paragraph.outerHTML);
-  return originalPageElements;
+  return elementsWithText;
 }
 
 // Message Listener
 (chrome.runtime || browser.runtime).onMessage.addListener((message, sender, sendResponse) => {
-  if (message.subject == 'parse-page') sendResponse({
-    'text': getParagraphsText(document),
-    'targetLang': message.data.targetLang,
-    'sourceLang': message.data.sourceLang
-  });
+  if (message.subject == 'parse-page') {
+    currentPageElements = getElementsWithText(document);
+    originalPageElements = currentPageElements.map(paragraph => paragraph.outerHTML);
+
+    sendResponse({
+      'text': originalPageElements,
+      'targetLang': message.data.targetLang,
+      'sourceLang': message.data.sourceLang
+    });
+  }
 });
