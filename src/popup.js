@@ -9,6 +9,10 @@ if (lastTargetLang) form['targetLangs'].value = lastTargetLang;
 form.onsubmit = () => {
   let sourceLang = form['sourceLangs'].value;
   let targetLang = form['targetLangs'].value;
-  localStorage.setItem('lastTargetLang', targetLang);
+
+  if (targetLang !== lastTargetLang) {
+    localStorage.setItem('lastTargetLang', targetLang);
+  }
+
   background.translatePage(targetLang, sourceLang);
 };

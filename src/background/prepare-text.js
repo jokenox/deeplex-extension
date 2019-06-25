@@ -2,6 +2,14 @@
 // Licensed under the MIT License
 // Copyright (c) 2019 Kenny Cruz
 
+/*
+"TML" means "Translation Markup Language"
+the form of this language is as follows:
+  <t1>This is an <t2>example</t2></t1>
+The "t" number indicates the index in an array
+where the original tag name and the attributes of that element are stored.
+*/
+
 let tmlAttributes = [];
 
 function listToText(list) {
