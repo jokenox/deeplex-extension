@@ -8,7 +8,7 @@ const showOriginalButton = document.querySelector('#showOriginalButton');
 let lastTargetLang = localStorage.getItem('lastTargetLang');
 if (lastTargetLang) form['targetLangs'].value = lastTargetLang;
 
-githubButton.onclick = () => window.open('https://github.com/deeplex/deeplex-extension');
+githubButton.onclick = () => window.open('https://github.com/jokenox/deeplex-extension');
 
 form.onsubmit = () => {
   let sourceLang = form['sourceLangs'].value;
