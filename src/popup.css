@@ -105,7 +105,7 @@
   text-align: center;
 }
 
-.translate-button {
+.blue-button {
   width: 276px;
   margin-top: 12px;
   padding: 0.75em 1.5em;
@@ -119,11 +119,11 @@
   cursor: pointer;
 }
 
-.translate-button:hover {
+.blue-button:hover {
   background-color: #006494;
 }
 
-.translate-button:focus {
+.blue-button:focus {
   outline: 0;
 }
 
@@ -138,4 +138,12 @@
 p {
   margin: 0;
   padding: 0;
+}
+
+.after-translation-label {
+  font-size: 18px;
+}
+
+.hidden {
+  display: none;
 }

@@ -29,6 +29,12 @@ function translatePage(targetLang, sourceLang) {
   });
 }
 
+function revertPageTranslation() {
+  browserTabs.query({ active: true, currentWindow: true }, tabs => {
+    browserTabs.sendMessage(tabs[0].id, { 'subject': 'revert-translation' });
+  });
+}
+
 // Message Listener
 runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.subject == 'check-for-translations') {
@@ -61,6 +67,8 @@ runtime.onMessage.addListener((message, sender, sendResponse) => {
       emptyTmlAttributesList();
 
       browserTabs.sendMessage(tabs[0].openerTabId, newMessage, fetchTranslation);
+
+      pageIsTranslated = true;
     });
   }
 });

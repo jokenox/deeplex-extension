@@ -5,6 +5,8 @@
 
 const elementsBlacklist = ['SCRIPT', 'STYLE', 'CODE', 'I'];
 
+let originalPageBody;
+let originalPageHead;
 let originalPageElements = [];
 let currentPageElements = [];
 
@@ -52,6 +54,8 @@ function getElementsWithText(element) {
 // Message Listener
 (chrome.runtime || browser.runtime).onMessage.addListener((message, sender, sendResponse) => {
   if (message.subject == 'parse-page') {
+    originalPageBody = document.body.innerHTML;
+    originalPageHead = document.head.innerHTML;
     currentPageElements = getElementsWithText(document);
     originalPageElements = currentPageElements.map(paragraph => paragraph.outerHTML);
 

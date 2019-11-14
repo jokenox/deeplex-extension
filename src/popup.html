@@ -3,14 +3,14 @@
   <head>
     <title>Deeplex</title>
     <link rel="stylesheet" href="popup.css">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600|Dosis:700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600|Dosis:700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
   </head>
   <body>
     <div class="header">
       <img class="header__icon" src="../img/icon48.png">
       <p class="header__title">Deeplex</p>
-      <div class="icon github-icon">
+      <div id="githubButton" class="icon github-icon">
         <i class="fab fa-github"></i>
       </div>
       <div class="icon">
@@ -53,8 +53,13 @@
           </select>
         </div>
 
-        <input class="translate-button" type="submit" value="Translate page">
+        <input class="blue-button" type="submit" value="Translate page">
       </form>
+
+      <div id="afterTranslation" class="hidden">
+        <p class="after-translation-label">This page was translated with <a href="https://www.deepl.com/translator">DeepL</a></p>
+        <input id="showOriginalButton" class="blue-button" type="button" value="Show original">
+      </div>
     </div>
 
     <script src="popup.js"></script>
